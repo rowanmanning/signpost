@@ -1,0 +1,34 @@
+{
+    "name": "signpost",
+    "version": "0.0.0",
+    "private": true,
+
+    "description": "Resolve an incoming request against a routing table",
+    "keywords": [ "request", "resolve", "route", "routing", "table" ],
+    "author": "Rowan Manning (http://rowanmanning.com/)",
+
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rowanmanning/signpost.git"
+    },
+    "homepage": "https://github.com/rowanmanning/signpost",
+    "bugs": "https://github.com/rowanmanning/signpost/issues",
+    "license": "MIT",
+
+    "engines": {
+        "node": ">=0.10"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "jshint": "~2.5",
+        "mocha": "~1.18",
+        "mockery": "~1.4",
+        "proclaim": "~2.0",
+        "sinon": "~1.9"
+    },
+
+    "main": "./lib/signpost.js",
+    "scripts": {
+        "test": "make test"
+    }
+}
