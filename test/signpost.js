@@ -149,6 +149,24 @@ describe('signpost', function () {
                 assert.strictEqual(router.resolveUrl('ws://route1/'), 'ws://target1/');
             });
 
+            it('should ignore protocols in routes and targets when matching', function () {
+                router = signpost.createRouter({
+                    'http://route1/': 'https://target1/',
+                    'https://route2/': 'http://target2/'
+                });
+                assert.strictEqual(router.resolveUrl('ws://route1/'), 'ws://target1/');
+                assert.strictEqual(router.resolveUrl('ws://route2/'), 'ws://target2/');
+            });
+
+            it('should ignore trailing slashes in routes and targets when matching', function () {
+                router = signpost.createRouter({
+                    'route1//': 'target1',
+                    'route2': 'target2//'
+                });
+                assert.strictEqual(router.resolveUrl('http://route1/'), 'http://target1/');
+                assert.strictEqual(router.resolveUrl('http://route2/'), 'http://target2/');
+            });
+
         });
 
         it('should have a `resolveRequest` method', function () {
