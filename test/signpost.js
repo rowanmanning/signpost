@@ -1,4 +1,4 @@
-/* jshint maxstatements: false */
+/* jshint maxstatements: false, maxlen: false */
 /* global afterEach, beforeEach, describe, it */
 'use strict';
 
@@ -54,11 +54,10 @@ describe('signpost', function () {
     });
 
     describe('router', function () {
-        var router, mockRouteData;
+        var router;
 
         beforeEach(function () {
-            mockRouteData = require('./mock/route-data');
-            router = signpost.createRouter(mockRouteData.routes);
+            router = signpost.createRouter({});
         });
 
         it('should have a `resolveUrl` method', function () {
@@ -82,10 +81,72 @@ describe('signpost', function () {
                 });
             });
 
-            it('should return the expected resolved routes', function () {
-                mockRouteData.requests.forEach(function (req) {
-                    assert.strictEqual(router.resolveUrl(req[0]), req[1]);
+            it('should return `false` when a matching route is not found', function () {
+                router = signpost.createRouter({});
+                assert.isFalse(router.resolveUrl('http://route1/'));
+            });
+
+            it('should resolve and return mathches for basic routes', function () {
+                router = signpost.createRouter({
+                    'route1': 'target1',
+                    'route2': 'target2'
                 });
+                assert.strictEqual(router.resolveUrl('http://route1/'), 'http://target1/');
+                assert.strictEqual(router.resolveUrl('http://route1/foo'), 'http://target1/foo');
+                assert.strictEqual(router.resolveUrl('http://route1/foo/bar'), 'http://target1/foo/bar');
+                assert.strictEqual(router.resolveUrl('http://route2/'), 'http://target2/');
+                assert.strictEqual(router.resolveUrl('http://route2/foo'), 'http://target2/foo');
+                assert.strictEqual(router.resolveUrl('http://route2/foo/bar'), 'http://target2/foo/bar');
+            });
+
+            it('should resolve and return matches for routes with a path in the target', function () {
+                router = signpost.createRouter({
+                    'route1': 'target1/foo',
+                    'route2': 'target2/foo/bar'
+                });
+                assert.strictEqual(router.resolveUrl('http://route1/'), 'http://target1/foo/');
+                assert.strictEqual(router.resolveUrl('http://route1/bar'), 'http://target1/foo/bar');
+                assert.strictEqual(router.resolveUrl('http://route2/'), 'http://target2/foo/bar/');
+                assert.strictEqual(router.resolveUrl('http://route2/baz'), 'http://target2/foo/bar/baz');
+            });
+
+            it('should resolve and return matches for routes with a path in the route', function () {
+                router = signpost.createRouter({
+                    'route1/foo': 'target1',
+                    'route1/bar': 'target1',
+                    'route2/foo/bar': 'target2'
+                });
+                assert.strictEqual(router.resolveUrl('http://route1/foo/'), 'http://target1/');
+                assert.strictEqual(router.resolveUrl('http://route1/foo/bar'), 'http://target1/bar');
+                assert.strictEqual(router.resolveUrl('http://route1/bar/'), 'http://target1/');
+                assert.strictEqual(router.resolveUrl('http://route1/bar/baz'), 'http://target1/baz');
+                assert.strictEqual(router.resolveUrl('http://route2/foo/bar/'), 'http://target2/');
+                assert.strictEqual(router.resolveUrl('http://route2/foo/bar/baz'), 'http://target2/baz');
+            });
+
+            it('should resolve and return matches for routes that are defined as objects', function () {
+                router = signpost.createRouter({
+                    'route': {
+                        'foo': 'target1',
+                        'bar': 'target2/baz/qux/',
+                        '/': 'target3'
+                    }
+                });
+                assert.strictEqual(router.resolveUrl('http://route/foo'), 'http://target3/foo');
+                assert.strictEqual(router.resolveUrl('http://route/foo1'), 'http://target3/foo1');
+                assert.strictEqual(router.resolveUrl('http://route/foo/'), 'http://target1/');
+                assert.strictEqual(router.resolveUrl('http://route/foo/bar'), 'http://target1/bar');
+                assert.strictEqual(router.resolveUrl('http://route/bar/'), 'http://target2/baz/qux/');
+                assert.strictEqual(router.resolveUrl('http://route/bar/foo'), 'http://target2/baz/qux/foo');
+            });
+
+            it('should use the same protocol in the matched route', function () {
+                router = signpost.createRouter({
+                    'route1': 'target1'
+                });
+                assert.strictEqual(router.resolveUrl('http://route1/'), 'http://target1/');
+                assert.strictEqual(router.resolveUrl('https://route1/'), 'https://target1/');
+                assert.strictEqual(router.resolveUrl('ws://route1/'), 'ws://target1/');
             });
 
         });
@@ -108,7 +169,7 @@ describe('signpost', function () {
                 };
             });
 
-            it('should error when called with an invalid Request objcet', function () {
+            it('should error when called with an invalid Request object', function () {
                 assert.throws(function () {
                     router.resolveRequest({});
                 }, /invalid `request` argument/i, 'Invalid request object');
