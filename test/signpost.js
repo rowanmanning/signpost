@@ -86,7 +86,7 @@ describe('signpost', function () {
                 assert.isFalse(router.resolveUrl('http://route1/'));
             });
 
-            it('should resolve and return mathches for basic routes', function () {
+            it('should resolve and return matches for basic routes', function () {
                 router = signpost.createRouter({
                     'route1': 'target1',
                     'route2': 'target2'
@@ -165,6 +165,37 @@ describe('signpost', function () {
                 });
                 assert.strictEqual(router.resolveUrl('http://route1/'), 'http://target1/');
                 assert.strictEqual(router.resolveUrl('http://route2/'), 'http://target2/');
+            });
+
+            it('should resolve routes in definition order', function () {
+                router = signpost.createRouter({
+                    'route1': 'target1',
+                    'route1/foo': 'target2',
+                });
+                assert.strictEqual(router.resolveUrl('http://route1/foo'), 'http://target1/foo');
+            });
+
+            it('should use the default route if no others match', function () {
+                router = signpost.createRouter({
+                    'route1': 'target1',
+                    'route2': 'target2',
+                    '**': 'target3',
+                    'route4': 'target4'
+                });
+                assert.strictEqual(router.resolveUrl('http://route3/'), 'http://target3/');
+                assert.strictEqual(router.resolveUrl('http://route4/'), 'http://target3/');
+            });
+
+            it('should support wildcards in the domain part of routes', function () {
+                router = signpost.createRouter({
+                    'route1': 'target1',
+                    '*.route1': 'target2',
+                    '*.route2/*': 'target3'
+                });
+                assert.strictEqual(router.resolveUrl('http://route1/'), 'http://target1/');
+                assert.strictEqual(router.resolveUrl('http://foo.route1/'), 'http://target2/');
+                assert.strictEqual(router.resolveUrl('http://foo.route1/bar'), 'http://target2/bar');
+                assert.strictEqual(router.resolveUrl('http://foo.route2/*/'), 'http://target3/');
             });
 
         });
