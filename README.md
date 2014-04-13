@@ -9,6 +9,21 @@ Resolve an incoming request against a routing table.
 **License:** [MIT][mit]  
 **Build Status:** [![Build Status][travis-img]][travis]
 
+```js
+var router = signpost.createRouter({
+    'example.com': 'localhost:3000',
+    'api.example.com': {
+        'v1': 'localhost:4000',
+        'v2': 'localhost:5000'
+    }
+});
+
+router.resolve('http://example.com/');            // http://localhost:3000/
+router.resolve('http://example.com/about');       // http://localhost:3000/about
+router.resolve('https://api.example.com/v1/foo'); // https://localhost:4000/foo
+router.resolve('https://api.example.com/v2/foo'); // https://localhost:5000/foo
+```
+
 
 Install
 -------
