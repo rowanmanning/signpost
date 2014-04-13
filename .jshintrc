@@ -8,5 +8,6 @@
     "maxcomplexity": 5,
     "maxlen": 100,
     "node": true,
-    "quotmark": "single"
+    "quotmark": "single",
+    "unused": true
 }
