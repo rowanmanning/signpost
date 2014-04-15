@@ -7,7 +7,7 @@ var mockery = require('mockery');
 var sinon = require('sinon');
 
 describe('signpost', function () {
-    var signpost;
+    var args, signpost;
 
     beforeEach(function () {
         mockery.enable({
@@ -15,10 +15,13 @@ describe('signpost', function () {
             warnOnUnregistered: false,
             warnOnReplace: false
         });
+        args = require('./mock/args');
+        mockery.registerMock('./args', args);
         signpost = require('../lib/signpost');
     });
 
     afterEach(function () {
+        mockery.deregisterAll();
         mockery.disable();
     });
 
@@ -32,19 +35,9 @@ describe('signpost', function () {
 
     describe('.createRouter()', function () {
 
-        it('should error when called with an invalid set of routes', function () {
-            assert.throws(function () {
-                signpost.createRouter('foo');
-            }, /invalid `routes` argument/i, 'Non-object routes');
-            assert.throws(function () {
-                signpost.createRouter();
-            }, /invalid `routes` argument/i, 'Nonexistant routes');
-        });
-
-        it('should not error when called with a valid set of routes', function () {
-            assert.doesNotThrow(function () {
-                signpost.createRouter({});
-            });
+        it('should assert that the given routes are an object', function () {
+            signpost.createRouter('foo');
+            assert.isTrue(args.assertIsObject.withArgs('routes', 'foo').calledOnce);
         });
 
         it('should return an object (router)', function () {
@@ -66,13 +59,9 @@ describe('signpost', function () {
 
         describe('.resolveUrl()', function () {
 
-            it('should error when called with an invalid URL', function () {
-                assert.throws(function () {
-                    router.resolveUrl(123);
-                }, /invalid `url` argument/i, 'Non-string url');
-                assert.throws(function () {
-                    router.resolveUrl();
-                }, /invalid `url` argument/i, 'Nonexistant url');
+            it('should assert that the given url is a string', function () {
+                router.resolveUrl('foo');
+                assert.isTrue(args.assertIsString.withArgs('url', 'foo').calledOnce);
             });
 
             it('should not error when called with a valid URL', function () {
@@ -218,26 +207,9 @@ describe('signpost', function () {
                 };
             });
 
-            it('should error when called with an invalid Request object', function () {
-                assert.throws(function () {
-                    router.resolveRequest({});
-                }, /invalid `request` argument/i, 'Invalid request object');
-                assert.throws(function () {
-                    router.resolveRequest('foo');
-                }, /invalid `request` argument/i, 'Non-object request');
-                assert.throws(function () {
-                    router.resolveRequest();
-                }, /invalid `request` argument/i, 'Nonexistant request');
-            });
-
-            it('should not error when called with a valid Request object', function () {
-                assert.doesNotThrow(function () {
-                    router.resolveRequest({
-                        connection: {},
-                        headers: {},
-                        url: ''
-                    });
-                });
+            it('should assert that the given request is a Request object', function () {
+                router.resolveRequest(mockRequest);
+                assert.isTrue(args.assertIsRequest.withArgs('request', mockRequest).calledOnce);
             });
 
             it('should call `resolveUrl` with the correct request URL (http)', function () {
