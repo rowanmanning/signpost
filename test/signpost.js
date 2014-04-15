@@ -7,7 +7,7 @@ var mockery = require('mockery');
 var sinon = require('sinon');
 
 describe('signpost', function () {
-    var args, signpost;
+    var args, routes, signpost;
 
     beforeEach(function () {
         mockery.enable({
@@ -17,6 +17,8 @@ describe('signpost', function () {
         });
         args = require('./mock/args');
         mockery.registerMock('./args', args);
+        routes = require('../lib/routes');
+        sinon.spy(routes, 'parse');
         signpost = require('../lib/signpost');
     });
 
@@ -35,9 +37,9 @@ describe('signpost', function () {
 
     describe('.createRouter()', function () {
 
-        it('should assert that the given routes are an object', function () {
+        it('should parse the given routes', function () {
             signpost.createRouter('foo');
-            assert.isTrue(args.assertIsObject.withArgs('routes', 'foo').calledOnce);
+            assert.isTrue(routes.parse.withArgs('foo').calledOnce);
         });
 
         it('should return an object (router)', function () {
@@ -72,7 +74,7 @@ describe('signpost', function () {
 
             it('should return `false` when a matching route is not found', function () {
                 router = signpost.createRouter({});
-                assert.isFalse(router.resolveUrl('http://route1/'));
+                assert.isFalse(router.resolveUrl('route1'));
             });
 
             it('should resolve and return matches for basic routes', function () {
@@ -185,6 +187,13 @@ describe('signpost', function () {
                 assert.strictEqual(router.resolveUrl('http://foo.route1/'), 'http://target2/');
                 assert.strictEqual(router.resolveUrl('http://foo.route1/bar'), 'http://target2/bar');
                 assert.strictEqual(router.resolveUrl('http://foo.route2/*/'), 'http://target3/');
+            });
+
+            it('should default to http if no protocol is defined', function () {
+                router = signpost.createRouter({
+                    'route1': 'target1'
+                });
+                assert.strictEqual(router.resolveUrl('route1/'), 'http://target1/');
             });
 
         });
