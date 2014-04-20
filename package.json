@@ -1,7 +1,6 @@
 {
     "name": "signpost",
-    "version": "0.0.0",
-    "private": true,
+    "version": "0.1.0",
 
     "description": "Resolve an incoming request against a routing table",
     "keywords": [ "request", "resolve", "route", "routing", "table" ],

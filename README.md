@@ -4,7 +4,7 @@ Signpost
 
 Resolve an incoming request against a routing table.
 
-**Current Version:** *0.0.0*  
+**Current Version:** *0.1.0*  
 **Node Support:** *0.10.x, 0.11.x*  
 **License:** [MIT][mit]  
 **Build Status:** [![Build Status][travis-img]][travis]
